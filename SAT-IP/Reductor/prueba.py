@@ -1,32 +1,56 @@
-variables = {
-    '1': 'a',
-    '2': 'b',
-    '3': 'c',
-    '4': 'd',
-    '5': 'e',
-    '6': 'f',
-    
-}
-def leer():
-    archivoR = open("pruebaDatos.txt", "r") 
-    lineas = archivoR.readlines()
-    result = {'variables': 0, 'constraints': 0, 'lines':[]}
-    for linea in lineas:
-        if linea[0] != 'c' and linea[0] != 'p': result['lines'].append(linea) #Añade a lines las lineas que corresponden a clausulas
-        if linea[0] == 'p':
-            lineaP = linea.split()
-            result['variables'] = lineaP[2]
-            result['constraints'] = lineaP[3]
-    archivoR.close()
-    return result
+import sys
+def leer(ruta):
+    try:
+        archivoR = open(ruta, "r") 
+        lineas = archivoR.readlines()
+        result = {'variables': 0, 'constraints': 0, 'lines':[]}
+        for linea in lineas:
+            if linea[0] != 'c' and linea[0] != 'p': result['lines'].append(linea) #Añade a lines las lineas que corresponden a clausulas
+            if linea[0] == 'p':
+                lineaP = linea.split()
+                result['variables'] = int(lineaP[2])
+                result['constraints'] = int(lineaP[3])
+        archivoR.close()
+        return result
+    except Exception as e:
+        print("Error[leer]: ", e)
+        return None
 
-def convertir(datos):
-    archivoW = open("pruebaResultados.txt", "w")
-    for linea in datos:
-        elements = linea.split()
-        for e in elements:
-            pass
+def convertir(ruta, datos):
+    archivoW = open(ruta, "w")
+    #Construir definicion de variables
+    for x in range(1, datos['variables']+1):
+        archivoW.write("var 0..1: v"+ str(x) + "; var 0..1: n_v" + str(x) +";\n")
+        archivoW.write("constraint v"+ str(x) + " + n_v" + str(x) +" = 1;\n\n")
 
-datos_leidos = leer()
+    for linea in datos['lines']:
+        elementos = linea.split()
+        elementos.pop()
+        archivoW.write("constraint ")
+        iterator = 0
+        if elementos[iterator][0] == '-':
+            elementos[iterator] = elementos[iterator].replace("-","")
+            archivoW.write("n_v"+elementos[iterator])
+        else:
+            archivoW.write("v"+elementos[iterator])
+        iterator += 1
+        while iterator < len(elementos):
+            archivoW.write(" + ")
+            if elementos[iterator][0] == "-":
+                elementos[iterator] = elementos[iterator].replace("-","")
+                archivoW.write("n_v"+elementos[iterator])
+            else:
+                archivoW.write("v"+elementos[iterator])
+            iterator += 1
+        archivoW.write(" >= 1;\n")
+    archivoW.write("solve satisfy;")
 
-convertir(datos_leidos)
+def main (entrada):
+    try:
+        if len(entrada) == 3:
+            resultado = leer(entrada[1])
+            if resultado: convertir(entrada[2], resultado)
+    except Exception as e:
+        print("Error[main]: ", e)
+            
+main(sys.argv)
