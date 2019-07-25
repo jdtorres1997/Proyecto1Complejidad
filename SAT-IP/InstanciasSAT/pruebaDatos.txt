@@ -1,6 +1,0 @@
-c Esto es un ejemplo
-c
-p cnf 6 3
-1 -2 3 0
-2 4 5 0
-4 6 0
