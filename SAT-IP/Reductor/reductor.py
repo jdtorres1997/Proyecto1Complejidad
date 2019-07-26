@@ -1,26 +1,17 @@
 import sys
-from os import listdir
-from os.path import isfile, join
-
-#def leer(ruta):
-def leer():    
+def leer(ruta):
     try:
-        onlyfiles = [f for f in listdir("../InstanciasSAT") if isfile(join("../InstanciasSAT", f))]
-        for f in onlyfiles:
-            rutaL="../InstanciasSAT/"+f#Ruta a los archivos de lectura
-            name= f.split(".")
-            rutaE="../InstanciasMiniZinc/reduccion_"+name[0]+".mzn"#Ruta a los archivos de escritura
-            archivoR = open(rutaL, "r") 
-            lineas = archivoR.readlines()
-            result = {'variables': 0, 'constraints': 0, 'lines':[]}
-            for linea in lineas:
-                if linea[0] != 'c' and linea[0] != 'p': result['lines'].append(linea) #Aade a lines las lineas que corresponden a clausulas
-                if linea[0] == 'p':
-                    lineaP = linea.split()
-                    result['variables'] = int(lineaP[2])
-                    result['constraints'] = int(lineaP[3])
-            archivoR.close()
-            convertir(rutaE,result)        
+        archivoR = open(ruta, "r") 
+        lineas = archivoR.readlines()
+        result = {'variables': 0, 'constraints': 0, 'lines':[]}
+        for linea in lineas:
+            if linea[0] != 'c' and linea[0] != 'p' and linea[0] != '%' and linea[0] != '0' and linea[0] != '\n': result['lines'].append(linea) #Anade a lines las lineas que corresponden a clausulas
+            if linea[0] == 'p':
+                lineaP = linea.split()
+                result['variables'] = int(lineaP[2])
+                result['constraints'] = int(lineaP[3])
+        archivoR.close()
+        return result
     except Exception as e:
         print("Error[leer]: ", e)
         return None
@@ -56,10 +47,11 @@ def convertir(ruta, datos):
 
 def main (entrada):
     try:
-        resultado = leer()
-        #if len(entrada) == 3:
-        #resultado = leer(entrada[1])
-        #if resultado: convertir(entrada[2], resultado)
+        if len(entrada) == 3:
+            input_file = entrada[1]
+            output_file = entrada[2]
+            resultado = leer(input_file)
+            if resultado: convertir(output_file, resultado)
     except Exception as e:
         print("Error[main]: ", e)
             
