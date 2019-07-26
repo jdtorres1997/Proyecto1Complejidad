@@ -48,8 +48,10 @@ def convertir(ruta, datos):
 def main (entrada):
     try:
         if len(entrada) == 3:
-            resultado = leer(entrada[1])
-            if resultado: convertir(entrada[2], resultado)
+            input_file = entrada[1]
+            output_file = entrada[2]
+            resultado = leer(input_file)
+            if resultado: convertir(output_file, resultado)
     except Exception as e:
         print("Error[main]: ", e)
             
